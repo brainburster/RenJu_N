@@ -1,0 +1,5 @@
+{
+    "presets": ["env"],
+    "minified": true,
+    "comments": false
+}

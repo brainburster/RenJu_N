@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+	<meta charset="utf-8">
+	<title>Renju*N</title>
+	<link rel="stylesheet" href="./css/my.css">
+</head>
+
+<body onselectstart="return false">
+	<div id='app'>
+		<h1 id='app-title'>AI 五?子棋</h1>
+		<canvas id='app-canvas'></canvas>
+		<input type="button" id="btn-ai-frist" value="AI先手">
+		<div id="board-info" class="app-block">请点击棋盘</div>
+		<!-- <p id="app-grap"></p> -->
+		<div id="app-setting" class="app-block">
+			<ul>
+				<li>
+					<span>棋盘大小:<b style="color:red;" id="board-size-value">15</b>格</span>
+					<input type="range" id="board-size" min=3 max=17 value=15>
+				</li>
+				<li>
+					<span>胜利条件:<b style="color:red;"  id="board-nwin-value">5</b>子连珠</span>
+					<input type="range" id="board-nwin" min=1 max=5 value=5>
+				</li>
+			</ul>
+			<input type="button" id="btn-board-undo" value="悔棋">
+			<input type="button" id="btn-board-debug" value="调试模式">
+		</div>
+	</div>
+</body>
+
+</html>
