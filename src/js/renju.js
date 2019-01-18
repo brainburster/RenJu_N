@@ -17,17 +17,17 @@ const main = () => {
   let controller = new Controller(canvas, info, btnAiFrist, sizeRange.valueAsNumber, nWinRange.valueAsNumber)
 
   btnUndo.onclick = (e) => {
-    controller.Undo()
+    controller.undo()
   }
   btnDebug.onclick = (e) => {
     btnDebug.value = controller.changeMode()
   }
-  // 为了兼容ie11
-  nWinRange.onmouseup = nWinRange.oninput = (e) => {
+
+  nWinRange.oninput = (e) => {
     nWinLabel.innerText = nWinRange.value
     controller.changeNWin(nWinRange.valueAsNumber)
   }
-  sizeRange.onmouseup = sizeRange.oninput = (e) => {
+  sizeRange.oninput = (e) => {
     const value = isNaN(sizeRange.valueAsNumber) ? 15 : sizeRange.valueAsNumber
     sizeLabel.innerText = value
     nWinRange.value = value < 5 ? value : 5

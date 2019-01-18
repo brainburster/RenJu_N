@@ -8,8 +8,8 @@ import { Analyser } from './analyser'
  * - [x] 博弈树（使用了负极大值算法，与极大极小值算法类似）
  * - [x] alpha-beta减枝
  * - [x] 启发式减枝
- * - [ ] 迭代深化
- * - [ ] 时限
+ * - [x] 迭代深化
+ * - [x] 时限
  * - [ ] 置换表
  * - [ ] 开局库
  * - [ ] 禁手
@@ -24,11 +24,18 @@ class GameTreeAI extends GreedAI {
     this.searchRange = Math.max(searchRange, 1)
     this.maxBreadth = Math.max(maxBreadth, 1)
     this.maxDepth = Math.max(maxDepth, 1)
+    this.timeout = false
+    this.lasttime = new Date()
+    this.timelimit = 1000 // ms
     this.best = null
   }
 
   /** 获取最佳下法 */
   think (color, depth, alpha, beta) {
+    // 如果是叶子节点则直接返回分数
+    if (depth < 1) {
+      return Analyser.getScore(this.board, color) - Analyser.getScore(this.board, -color)
+    }
     const openlist = this.getNexts(color, depth === this.maxDepth ? this.searchRange : 1)
     if (openlist.length === 0) {
       return 0 // 将平局分数设置为零，不然AI会避免平局
@@ -36,13 +43,16 @@ class GameTreeAI extends GreedAI {
     openlist.length = Math.min(openlist.length, this.maxBreadth)// 启发式减枝，限制每次递归的广度
     // 遍历每一个可行下法
     for (const place of openlist) {
-      if (this.lastPlace === null && depth === this.maxDepth) {
-        this.best = place // 默认值为启发式排序中的第一个下法
+      if (this.best === null) {
+        this.best = place // 默认值为由贪心算法决定的估值最大的一个下法
       }
-      if (depth < 1) {
-        return Analyser.getScore(this.board, color) - Analyser.getScore(this.board, -color)
+      // 超时检测
+      if (this.maxDepth === depth && this.best !== null) {
+        if ((new Date()).getTime() - this.lasttime.getTime() > this.timelimit) {
+          this.timeout = true
+          return 0
+        }
       }
-
       this.board.placeStone(place)// 下棋
       if (Analyser.isWin(this.board, place)) {
         place.score = 100000 + depth // 加上这个深度是为了让AI认为：早点胜利分值更高
@@ -65,13 +75,37 @@ class GameTreeAI extends GreedAI {
     return alpha
   }
 
+  /** 迭代深化 */
+  iterativeDeepening (color) {
+    this.timeout = false
+    this.best = null
+    const maxDepthOld = this.maxDepth
+    let best = this.best
+    for (let depth = 4; depth <= maxDepthOld; ++depth) {
+      this.maxDepth = depth
+      this.think(color, this.maxDepth, best === null ? -10e8 : best.score, 10e8) // 一次固定深度的搜索
+      if (this.timeout) { // -> this.best = best 退回到上一次的结果
+        break
+      }
+      best = this.best
+      best.depth = this.maxDepth
+      if (best !== null && best.score >= 100000) {
+        break
+      }
+      // todo:将最优点加入置换表 然后在启发式搜索函数中获取将此下法的排序提前
+      // ...
+    }
+    this.timeout = false
+    this.maxDepth = maxDepthOld
+    this.best = best
+  }
+
   /** AI执行函数 */
   run (color, callback) {
-    this.best = null
-    // 这里延时是为了留出时间让界面得以渲染，并不是多线程，多线程要通过worker或ajax实现
+    this.lasttime = new Date()
     setTimeout(() => {
-      this.think(color, this.maxDepth, -10e8, 10e8)
-      callback(this.best)// 如果为best为null则判定为平局
+      this.iterativeDeepening(color) // 迭代深化
+      callback(this.best)
     }, 20)
   }
 }

@@ -2,6 +2,8 @@ div#app {
     text-align: center;
     margin-bottom: 10px;
     overflow: hidden;
+    left: 20%;
+    right: 20%;
 }
 
 div#app canvas#app-canvas{
@@ -18,7 +20,7 @@ div#app div#app-setting{
 
 div#app div#app-setting:hover{
     background-color:white;
-    margin-top: 14px;
+    margin: 14px 10px auto;
 }
 
 div#app #board-info{
@@ -32,7 +34,7 @@ div#app #board-info{
 }
 
 div#app #board-info:hover{
-    margin-top: 14px;
+    margin: 14px 10px auto;
 }
 
 li{

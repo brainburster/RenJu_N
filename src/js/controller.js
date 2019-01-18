@@ -19,12 +19,13 @@ class Controller {
     this.pointer = { x: NaN, y: NaN } // 落子提示
     this.playerColor = -1 // -1代表黑色
     this.stoneList = [] // 记录下过的棋子
+    this.lastTime = new Date()
     this.info = info
     this.canvas = canvas
     this.logger = new Logger(info)
     this.board = new Board(size, nWin)
     this.renderer = new Renderer(this)
-    this.AI = new GameTreeAI(this, 8, 6, 2) // new GreedAI(this)
+    this.AI = new GameTreeAI(this, 8, 8, 2) // new GreedAI(this)
 
     canvas.onclick = (e) => {
       if (this.debugMode) {
@@ -98,15 +99,16 @@ class Controller {
     this.board.nWin = newNWin
   }
 
-  Undo () {
+  undo (twice = true, lastUndo = undefined) {
     const point = this.stoneList.pop()
     if (point === undefined) {
       return
     }
-    this.board.clearStone(point.x, point.y)
+    this.board.undo(point)
     this.playerColor *= -1
     this.state = EState.waitplayer
-    this.log(`撤销${JSON.stringify(point)}`)
+    if (twice) { this.undo(false, point) }
+    this.log(`撤销${JSON.stringify(lastUndo)}`, `撤销${JSON.stringify(point)}`)
   }
 
   placeStone (offsetX, offsetY) {
@@ -121,16 +123,15 @@ class Controller {
     }
     this.stoneList.push(place)
     let isWin = Analyser.isWin(this.board, place)
-    let score
     if (isWin) {
       this.log('你赢了')
-      window.alert('你输了')
+      window.alert('你赢了')
       this.state = EState.end
       return
     }
     this.state = EState.waitAI
     this.log('AI正在思考中')
-    let data1 = new Date()
+    this.lastTime = new Date()
     this.AI.run(-this.playerColor, (best) => {
       if (best === null || isNaN(best.x) || isNaN(best.y)) {
         this.state = EState.end
@@ -138,7 +139,6 @@ class Controller {
         window.alert('平局')
         return
       }
-      score = best.score
       this.board.placeStone(best)
       let isWin = Analyser.isWin(this.board, best)
       this.stoneList.push(best)
@@ -148,17 +148,14 @@ class Controller {
         window.alert('你输了')
         return
       }
-      let data2 = new Date()
-      let delayTime = Math.max(data2.getTime() - data1.getTime(), 20)
+      const delayTime = Math.max((new Date()).getTime() - this.lastTime.getTime(), 20)
       this.log(
-        `黑方分数:${Analyser.getScore(this.board, EStoneColor.black)}`,
-        `白方分数:${Analyser.getScore(this.board, EStoneColor.white)}`,
-        `AI估值:${score},AI思考时间:${delayTime / 1000}秒`
+        `黑方分数:${Analyser.getScore(this.board, EStoneColor.black)},白方分数:${Analyser.getScore(this.board, EStoneColor.white)}`,
+        `AI估值:${best.score}`,
+        `AI思考时间:${delayTime / 1000}秒,递归深度:${best.depth}`
       )
       this.state = EState.waitplayer
     })
-
-    // ...
   }
 
   debugBoard (offsetX, offsetY) {
