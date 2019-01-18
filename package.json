@@ -9,14 +9,14 @@
   "scripts": {
     "build": "webpack",
     "run" : "node index.js",
-    "test": "webpack | node index.js"
+    "test": "webpack && node index.js"
   },
   "keywords": [
     "renju",
     "es6"
   ],
   "author": "ZengLiyuan",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",

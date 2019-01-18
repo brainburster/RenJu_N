@@ -47,13 +47,7 @@ npm test
 - [ ] 开局库
 - [ ] 禁手
 - [ ] 网页多线程
-- [ ] AI设置界面
+- [X] AI设置界面
 - [x] 设置时限
 - [ ] 其他功能
-<<<<<<< HEAD
 - [ ] 界面美化
-=======
-
-[详细信息](https://github.com/brainburster/RenJuN/blob/master/src/README.md)
----
->>>>>>> f5ae407c985526262c7e9260b7e8659444c49990

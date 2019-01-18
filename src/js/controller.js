@@ -1,7 +1,6 @@
 import { Board, Place } from './board'
 import { Renderer, EStoneColor } from './renderer'
 import { Analyser } from './AI/analyser'
-// import { GreedAI } from './AI/simpleAI'
 import { GameTreeAI } from './AI/gameTreeAI'
 import { Logger } from './logger'
 
@@ -14,7 +13,7 @@ var EState = {
 }
 
 class Controller {
-  constructor (canvas, info, btnAiFrist, size = 15, nWin = 5) {
+  constructor (canvas, info, btnAiFrist, size = 15, nWin = 5, breadth = 8, depth = 8, timelimit = 300) {
     this.state = EState.init // 游戏的状态
     this.pointer = { x: NaN, y: NaN } // 落子提示
     this.playerColor = -1 // -1代表黑色
@@ -25,8 +24,11 @@ class Controller {
     this.logger = new Logger(info)
     this.board = new Board(size, nWin)
     this.renderer = new Renderer(this)
-    this.AI = new GameTreeAI(this, 8, 8, 2) // new GreedAI(this)
-
+    this.AI = new GameTreeAI(this, breadth, depth, 2, Math.max(100, timelimit)) // new GreedAI(this)
+    canvas.onmouseup = (e) => {
+      this.pointer.x = NaN
+      this.pointer.y = NaN
+    }
     canvas.onclick = (e) => {
       if (this.debugMode) {
         this.debugBoard(e.offsetX, e.offsetY)
@@ -46,7 +48,6 @@ class Controller {
           this.log('别着急，AI正在思考对策')
           break
         case EState.end:
-          // this.log('游戏已结束，请按f5刷新页面')
           window.confirm('游戏已结束，刷新页面?')
             ? window.location.reload()
             : window.alert('你也可以通过调整棋盘大小来刷新棋盘')
@@ -107,8 +108,14 @@ class Controller {
     this.board.undo(point)
     this.playerColor *= -1
     this.state = EState.waitplayer
-    if (twice) { this.undo(false, point) }
-    this.log(`撤销${JSON.stringify(lastUndo)}`, `撤销${JSON.stringify(point)}`)
+    this.log(
+      `撤销:${lastUndo === undefined ? '*' : JSON.stringify(lastUndo)}`,
+      `撤销:${lastUndo === undefined ? '*' : JSON.stringify(point)}`,
+      '撤销完毕')
+    // 递归
+    if (twice) {
+      this.undo(false, point)
+    }
   }
 
   placeStone (offsetX, offsetY) {

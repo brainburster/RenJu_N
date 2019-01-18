@@ -6,6 +6,16 @@ div#app {
     right: 20%;
 }
 
+#app select{
+    display: inline;
+    cursor:pointer;
+}
+
+#app h1{
+    display: block;
+    cursor:default;
+}
+
 div#app canvas#app-canvas{
     border: 2px gray solid;
     background-color: rgb(233, 233, 233);
@@ -64,17 +74,6 @@ div#app #btn-ai-frist:hover{
 div#app input[type=button]{
     display: inline-block;
     cursor:pointer;
-}
-
-#app select{
-    display: inline;
-    cursor:pointer;
-}
-
-
-#app h1{
-    display: block;
-    cursor:default;
 }
 
 .app-block::before, .app-block::after{

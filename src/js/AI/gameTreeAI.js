@@ -18,7 +18,7 @@ import { Analyser } from './analyser'
  * - [ ] 其他功能
  */
 class GameTreeAI extends GreedAI {
-  constructor (controller, maxBreadth, maxDepth, searchRange = 2) {
+  constructor (controller, maxBreadth, maxDepth, searchRange = 2, timelimit = 100) {
     super(controller)
     this.controller = controller
     this.searchRange = Math.max(searchRange, 1)
@@ -26,7 +26,7 @@ class GameTreeAI extends GreedAI {
     this.maxDepth = Math.max(maxDepth, 1)
     this.timeout = false
     this.lasttime = new Date()
-    this.timelimit = 1000 // ms
+    this.timelimit = Math.max(timelimit, 100)
     this.best = null
   }
 
@@ -81,10 +81,10 @@ class GameTreeAI extends GreedAI {
     this.best = null
     const maxDepthOld = this.maxDepth
     let best = this.best
-    for (let depth = 4; depth <= maxDepthOld; ++depth) {
+    for (let depth = 1; depth <= maxDepthOld; ++depth) {
       this.maxDepth = depth
-      this.think(color, this.maxDepth, best === null ? -10e8 : best.score, 10e8) // 一次固定深度的搜索
-      if (this.timeout) { // -> this.best = best 退回到上一次的结果
+      this.think(color, depth, -10e8, 10e8)
+      if (this.timeout || this.best === null) { // -> this.best = best 退回到上一次的结果
         break
       }
       best = this.best
@@ -104,7 +104,7 @@ class GameTreeAI extends GreedAI {
   run (color, callback) {
     this.lasttime = new Date()
     setTimeout(() => {
-      this.iterativeDeepening(color) // 迭代深化
+      this.iterativeDeepening(color)
       callback(this.best)
     }, 20)
   }
