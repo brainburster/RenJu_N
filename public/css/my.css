@@ -20,19 +20,14 @@ div#app canvas#app-canvas{
     border: 2px gray solid;
     background-color: rgb(233, 233, 233);
     cursor:pointer;
-    margin: 30px auto;
+    margin: 14px auto 30px;
 }
 
 div#app div#app-setting{
-    background-color: rgb(233, 233, 233);
     margin:12px auto;
     overflow: hidden;
 }
 
-div#app div#app-setting:hover{
-    background-color:white;
-    margin: 14px 10px auto;
-}
 
 div#app #board-info{
     display: block;
@@ -42,10 +37,6 @@ div#app #board-info{
     color: white;
     overflow: hidden;
     margin:12px auto
-}
-
-div#app #board-info:hover{
-    margin: 14px 10px auto;
 }
 
 li{
@@ -64,12 +55,12 @@ div#app #btn-ai-frist{
     font-size: 24px;
     color: white;
     background-color : darkgray;
-    margin: 12px auto;
+    margin: 0px auto 30px;
 }
 
 div#app #btn-ai-frist:hover{
     font-size: 26px;
-    margin: 10px auto;
+    margin: 0px auto 24px;
 }
 
 div#app input[type=button]{
