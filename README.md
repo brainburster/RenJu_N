@@ -1,19 +1,19 @@
 RenJuN-五?子棋
 ---
-[查看项目](http://148.70.24.86/ "五子棋项目")  
+[查看项目](https://brainburster.github.io/RenJuN/ "五子棋项目")  
 ---
 说明
 ---
 运行项目
 ---
 - 直接用游览器打开**public**文件夹下的**index.html**即可
-- 如果安装了*nodejs*，可以在控制台输入`node index.js`运行服务器程序时，*index.js*只是一个普通的静态文件服务器，然后在游览器地址栏输入`http://127.0.0.1:8080/`
+- 或者，如果你安装了*nodejs*，可以在控制台输入`node index.js`运行服务器程序时，*index.js*只是一个普通的静态文件服务器，然后在游览器地址栏输入`http://127.0.0.1:8080/`打开网页
 - 不支持*IE8*以下
 - *src*目录下的*index.html*文件**并不能**运行
 
 开发设置
 ---
-- 使用*npm*安装依赖，都是开发时依赖，没有运行时依赖
+- 使用*npm*安装开发时依赖
 ```
 npm install
 ```
@@ -25,7 +25,7 @@ npm install webpack webpack-cli -g
 ``` 
   webpack
 ```
-- 源代码在*src*文件夹下面,*public*文件夹下是编译好的静态网页文件
+- 源代码在*src*文件夹下面,编译好的静态网页文件在*public*文件夹下
 
  todolist
  ---
@@ -45,3 +45,6 @@ npm install webpack webpack-cli -g
 - [ ] 多线程
 - [ ] AI设置界面
 - [ ] 其他功能
+
+[详细信息](https://github.com/brainburster/RenJuN/blob/master/src/README.md)
+---
