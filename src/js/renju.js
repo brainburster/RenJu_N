@@ -23,25 +23,25 @@ const main = () => {
 
   const controller = new Controller(canvas, info, btnAiFrist, sizeRange.valueAsNumber, nWinRange.valueAsNumber, breadthRange.valueAsNumber, depthRange.valueAsNumber, timelimitRange.valueAsNumber * 100)
 
-  depthRange.oninput = (e) => {
+  depthRange.onmouseup = depthRange.oninput = (e) => {
     depthLabel.innerText = depthRange.value
     controller.AI.maxDepth = Math.max(0, depthRange.valueAsNumber)
   }
-  breadthRange.oninput = (e) => {
+  breadthRange.onmouseup = breadthRange.oninput = (e) => {
     breadthLabel.innerText = breadthRange.value
     controller.AI.maxBreadth = Math.max(1, breadthRange.valueAsNumber)
   }
-  timelimitRange.oninput = (e) => {
+  timelimitRange.onmouseup = timelimitRange.oninput = (e) => {
     timelimitLabel.innerText = timelimitRange.valueAsNumber * 100
     controller.AI.timelimit = Math.max(100, timelimitRange.valueAsNumber * 100)
   }
-  nWinRange.oninput = (e) => {
+  nWinRange.onmouseup = nWinRange.oninput = (e) => {
     nWinLabel.innerText = nWinRange.value
     controller.changeNWin(nWinRange.valueAsNumber)
     // TitleLabel.innerText = `${nWinRange.value}-${chineseNumbers[nWinRange.value]}`
     TitleLabel.innerHTML = `<span style="color:red;">${nWinRange.value}</span>-${chineseNumbers[nWinRange.value]}`
   }
-  sizeRange.oninput = (e) => {
+  sizeRange.onmouseup = sizeRange.oninput = (e) => {
     const value = isNaN(sizeRange.valueAsNumber) ? 15 : sizeRange.valueAsNumber
     sizeLabel.innerText = value
     nWinRange.value = value < 5 ? value : 5
