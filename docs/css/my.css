@@ -20,7 +20,7 @@ div#app canvas#app-canvas{
     border: 2px gray solid;
     background-color: rgb(233, 233, 233);
     cursor:pointer;
-    margin-bottom 60px;
+    margin-bottom: 60px;
 }
 
 div#app div#app-setting{
