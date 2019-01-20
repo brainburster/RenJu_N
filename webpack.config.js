@@ -24,8 +24,7 @@ module.exports = {
         options: {
           name: '[name]:[hash:8].js',
           fallback: false,
-          inline: true,
-          publicPath: '/js/workers/'
+          inline: true
         }
       }
     ]

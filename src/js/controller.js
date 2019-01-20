@@ -1,7 +1,7 @@
 import { Board, Place } from './board'
 import { Renderer, EStoneColor } from './renderer'
 import { Analyser } from './AI/analyser'
-// import { GameTreeAI } from './AI/gameTreeAI'
+import { GameTreeAI } from './AI/gameTreeAI'
 import AIWorker from './AI/AI.worker.js'
 import { Logger } from './logger'
 
@@ -28,41 +28,17 @@ class Controller {
     this.logger = new Logger(info)
     this.board = new Board(size, nWin)
     this.renderer = new Renderer(this)
-    // this.AI = new GameTreeAI(this.board, breadth, depth, 2, Math.max(100, timelimit))
-    this.AIWorker = new AIWorker() // 多线程版本的GameTreeAI
-    window.onclose = (e) => {
-      this.AIWorker.terminate() // 关闭worker
-      window.alert('AI线程已释放')
-    }
-    this.AIWorker.onmessage = (e) => {
-      const best = e.data
-      if (best === null || isNaN(best.x) || isNaN(best.y)) {
-        this.state = EState.end
-        this.log('平局')
-        window.alert('平局')
-        return
-      }
-      this.board.placeStone(best)
-      let isWin = Analyser.isWin(this.board, best)
-      this.stoneList.push(best)
-      if (isWin) {
-        this.state = EState.end
-        this.log('你输了')
-        window.alert('你输了')
-        return
-      }
-      const delayTime = Math.max((new Date()).getTime() - this.lastTime.getTime(), 20)
-      this.log(
-        `黑方分数:${Analyser.getScore(this.board, EStoneColor.black)},白方分数:${Analyser.getScore(this.board, EStoneColor.white)}`,
-        `AI估值:${best.score}`,
-        `AI思考时间:${delayTime / 1000}秒,递归深度:${best.depth}`
-      )
-      this.state = EState.waitplayer
-    }
+
+    this.isIE = !!window.ActiveXObject || 'ActiveXObject' in window
+
+    // 如果非IE则使用多线程版本AI，因为我电脑上只有Chrome、IE、Edge,所以其他游览器我不考虑
+    this.registerAI()
+
     canvas.onmouseup = (e) => {
       this.pointer.x = NaN
       this.pointer.y = NaN
     }
+
     canvas.onclick = (e) => {
       if (this.debugMode) {
         this.debugBoard(e.offsetX, e.offsetY)
@@ -173,37 +149,82 @@ class Controller {
     this.state = EState.waitAI
     this.log('AI正在思考中')
     this.lastTime = new Date()
-    this.AIWorker.postMessage({
-      color: -this.playerColor,
-      board: this.board,
-      depth: this.depth,
-      breadth: this.breadth,
-      timelimit: this.timelimit
-    })
-    // this.AI.run(-this.playerColor, (best) => {
-    //   if (best === null || isNaN(best.x) || isNaN(best.y)) {
-    //     this.state = EState.end
-    //     this.log('平局')
-    //     window.alert('平局')
-    //     return
-    //   }
-    //   this.board.placeStone(best)
-    //   let isWin = Analyser.isWin(this.board, best)
-    //   this.stoneList.push(best)
-    //   if (isWin) {
-    //     this.state = EState.end
-    //     this.log('你输了')
-    //     window.alert('你输了')
-    //     return
-    //   }
-    //   const delayTime = Math.max((new Date()).getTime() - this.lastTime.getTime(), 20)
-    //   this.log(
-    //     `黑方分数:${Analyser.getScore(this.board, EStoneColor.black)},白方分数:${Analyser.getScore(this.board, EStoneColor.white)}`,
-    //     `AI估值:${best.score}`,
-    //     `AI思考时间:${delayTime / 1000}秒,递归深度:${best.depth}`
-    //   )
-    //   this.state = EState.waitplayer
-    // })
+
+    this.runAI()
+  }
+
+  runAI () {
+    if (this.isIE) { // 启动单线程版本的AI
+      this.AI.init(this.board, this.breadth, this.depth, 2, this.timelimit)
+      this.AI.run(-this.playerColor, (best) => {
+        if (best === null || isNaN(best.x) || isNaN(best.y)) {
+          this.state = EState.end
+          this.log('平局')
+          window.alert('平局')
+          return
+        }
+        this.board.placeStone(best)
+        let isWin = Analyser.isWin(this.board, best)
+        this.stoneList.push(best)
+        if (isWin) {
+          this.state = EState.end
+          this.log('你输了')
+          window.alert('你输了')
+          return
+        }
+        const delayTime = Math.max((new Date()).getTime() - this.lastTime.getTime(), 20)
+        this.log(
+          `黑方分数:${Analyser.getScore(this.board, EStoneColor.black)},白方分数:${Analyser.getScore(this.board, EStoneColor.white)}`,
+          `AI估值:${best.score}`,
+          `AI思考时间:${delayTime / 1000}秒,递归深度:${best.depth}`
+        )
+        this.state = EState.waitplayer
+      })
+    } else { // 将数据穿给多线程版的AI
+      this.AIWorker.postMessage({
+        color: -this.playerColor,
+        board: this.board, // 传输过程经过了json化，因此接口被破坏了，需要在AI.worker.js中修复
+        depth: this.depth,
+        breadth: this.breadth,
+        timelimit: this.timelimit
+      })
+    }
+  }
+
+  registerAI () {
+    if (this.isIE) {
+      this.AI = new GameTreeAI(this.board, this.breadth, this.depth, 2, Math.max(100, this.timelimit))
+    } else {
+      this.AIWorker = new AIWorker() // 多线程版本的GameTreeAI
+      window.onunload = (e) => {
+        this.AIWorker.terminate() // 关闭worker
+      }
+      this.AIWorker.onmessage = (e) => {
+        const best = e.data
+        if (best === null || isNaN(best.x) || isNaN(best.y)) {
+          this.state = EState.end
+          this.log('平局')
+          window.alert('平局')
+          return
+        }
+        this.board.placeStone(best)
+        let isWin = Analyser.isWin(this.board, best)
+        this.stoneList.push(best)
+        if (isWin) {
+          this.state = EState.end
+          this.log('你输了')
+          window.alert('你输了')
+          return
+        }
+        const delayTime = Math.max((new Date()).getTime() - this.lastTime.getTime(), 20)
+        this.log(
+          `黑方分数:${Analyser.getScore(this.board, EStoneColor.black)},白方分数:${Analyser.getScore(this.board, EStoneColor.white)}`,
+          `AI估值:${best.score}`,
+          `AI思考时间:${delayTime / 1000}秒,递归深度:${best.depth}`
+        )
+        this.state = EState.waitplayer
+      }
+    }
   }
 
   debugBoard (offsetX, offsetY) {
