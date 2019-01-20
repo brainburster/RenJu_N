@@ -20,7 +20,7 @@ div#app canvas#app-canvas{
     border: 2px gray solid;
     background-color: rgb(233, 233, 233);
     cursor:pointer;
-    margin: 14px auto 30px;
+    margin: 14px auto 28px;
 }
 
 div#app div#app-setting{
@@ -55,12 +55,12 @@ div#app #btn-ai-frist{
     font-size: 24px;
     color: white;
     background-color : darkgray;
-    margin: 0px auto 30px;
+    margin: 2px auto 30px;
 }
 
 div#app #btn-ai-frist:hover{
     font-size: 26px;
-    margin: 0px auto 24px;
+    margin: 0px auto 28px;
 }
 
 div#app input[type=button]{

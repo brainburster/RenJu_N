@@ -1,7 +1,8 @@
 import { Board, Place } from './board'
 import { Renderer, EStoneColor } from './renderer'
 import { Analyser } from './AI/analyser'
-import { GameTreeAI } from './AI/gameTreeAI'
+// import { GameTreeAI } from './AI/gameTreeAI'
+import AIWorker from './AI/AI.worker.js'
 import { Logger } from './logger'
 
 var EState = {
@@ -19,12 +20,45 @@ class Controller {
     this.playerColor = -1 // -1代表黑色
     this.stoneList = [] // 记录下过的棋子
     this.lastTime = new Date()
+    this.breadth = breadth
+    this.depth = depth
+    this.timelimit = timelimit
     this.info = info
     this.canvas = canvas
     this.logger = new Logger(info)
     this.board = new Board(size, nWin)
     this.renderer = new Renderer(this)
-    this.AI = new GameTreeAI(this, breadth, depth, 2, Math.max(100, timelimit)) // new GreedAI(this)
+    // this.AI = new GameTreeAI(this.board, breadth, depth, 2, Math.max(100, timelimit))
+    this.AIWorker = new AIWorker() // 多线程版本的GameTreeAI
+    window.onclose = (e) => {
+      this.AIWorker.terminate() // 关闭worker
+      window.alert('AI线程已释放')
+    }
+    this.AIWorker.onmessage = (e) => {
+      const best = e.data
+      if (best === null || isNaN(best.x) || isNaN(best.y)) {
+        this.state = EState.end
+        this.log('平局')
+        window.alert('平局')
+        return
+      }
+      this.board.placeStone(best)
+      let isWin = Analyser.isWin(this.board, best)
+      this.stoneList.push(best)
+      if (isWin) {
+        this.state = EState.end
+        this.log('你输了')
+        window.alert('你输了')
+        return
+      }
+      const delayTime = Math.max((new Date()).getTime() - this.lastTime.getTime(), 20)
+      this.log(
+        `黑方分数:${Analyser.getScore(this.board, EStoneColor.black)},白方分数:${Analyser.getScore(this.board, EStoneColor.white)}`,
+        `AI估值:${best.score}`,
+        `AI思考时间:${delayTime / 1000}秒,递归深度:${best.depth}`
+      )
+      this.state = EState.waitplayer
+    }
     canvas.onmouseup = (e) => {
       this.pointer.x = NaN
       this.pointer.y = NaN
@@ -139,30 +173,37 @@ class Controller {
     this.state = EState.waitAI
     this.log('AI正在思考中')
     this.lastTime = new Date()
-    this.AI.run(-this.playerColor, (best) => {
-      if (best === null || isNaN(best.x) || isNaN(best.y)) {
-        this.state = EState.end
-        this.log('平局')
-        window.alert('平局')
-        return
-      }
-      this.board.placeStone(best)
-      let isWin = Analyser.isWin(this.board, best)
-      this.stoneList.push(best)
-      if (isWin) {
-        this.state = EState.end
-        this.log('你输了')
-        window.alert('你输了')
-        return
-      }
-      const delayTime = Math.max((new Date()).getTime() - this.lastTime.getTime(), 20)
-      this.log(
-        `黑方分数:${Analyser.getScore(this.board, EStoneColor.black)},白方分数:${Analyser.getScore(this.board, EStoneColor.white)}`,
-        `AI估值:${best.score}`,
-        `AI思考时间:${delayTime / 1000}秒,递归深度:${best.depth}`
-      )
-      this.state = EState.waitplayer
+    this.AIWorker.postMessage({
+      color: -this.playerColor,
+      board: this.board,
+      depth: this.depth,
+      breadth: this.breadth,
+      timelimit: this.timelimit
     })
+    // this.AI.run(-this.playerColor, (best) => {
+    //   if (best === null || isNaN(best.x) || isNaN(best.y)) {
+    //     this.state = EState.end
+    //     this.log('平局')
+    //     window.alert('平局')
+    //     return
+    //   }
+    //   this.board.placeStone(best)
+    //   let isWin = Analyser.isWin(this.board, best)
+    //   this.stoneList.push(best)
+    //   if (isWin) {
+    //     this.state = EState.end
+    //     this.log('你输了')
+    //     window.alert('你输了')
+    //     return
+    //   }
+    //   const delayTime = Math.max((new Date()).getTime() - this.lastTime.getTime(), 20)
+    //   this.log(
+    //     `黑方分数:${Analyser.getScore(this.board, EStoneColor.black)},白方分数:${Analyser.getScore(this.board, EStoneColor.white)}`,
+    //     `AI估值:${best.score}`,
+    //     `AI思考时间:${delayTime / 1000}秒,递归深度:${best.depth}`
+    //   )
+    //   this.state = EState.waitplayer
+    // })
   }
 
   debugBoard (offsetX, offsetY) {

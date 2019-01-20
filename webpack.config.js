@@ -16,8 +16,17 @@ module.exports = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        exclude: path.resolve(__dirname, 'node_modules'),
-        include: path.resolve(__dirname, 'src')
+        exclude: path.resolve(__dirname, 'node_modules')
+      },
+      {
+        test: /\.worker\.js$/,
+        loader: 'worker-loader',
+        options: {
+          name: '[name]:[hash:8].js',
+          fallback: false,
+          inline: true,
+          publicPath: '/js/workers/'
+        }
       }
     ]
   },

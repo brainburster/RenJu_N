@@ -18,8 +18,8 @@ class Place {
   */
 class Board {
   constructor (size = 15, nWin = 5, data = []) {
-    if (size <= 0 || nWin <= 0) {
-      throw new Error(`size or nWin <= 0,\n size : ${size} \n nWin : ${nWin}`)
+    if (size < 0 || nWin < 0) {
+      throw new Error(`size or nWin < 0,\n size : ${size} \n nWin : ${nWin}`)
     }
     this.size = size
     this.nWin = nWin

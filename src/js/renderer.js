@@ -84,9 +84,9 @@ class Renderer {
       let x = (point.x + 0.50) * gridSize
       let y = (point.y + 0.50) * gridSize
       if (index > 8) { // index+1>=10
-        this.context.font = `${gridSize * 0.6}px Georgia, 'Arial', '微软雅黑'`
+        this.context.font = `${gridSize * 0.55}px Georgia, 'Times new roman'`
       } else {
-        this.context.font = `${gridSize * 0.75}px Georgia, 'Arial', '微软雅黑'`
+        this.context.font = `${gridSize * 0.6}px Georgia, 'Times new roman'`
       }
       if (point.color === EStoneColor.black) {
         this.context.fillStyle = 'white'

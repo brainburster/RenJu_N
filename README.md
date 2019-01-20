@@ -1,39 +1,18 @@
-RenJuN-五?子棋
----
-[查看项目](https://brainburster.github.io/RenJuN/ "五子棋项目")  
----
-说明
----
-运行项目
----
-- 直接用游览器打开**public**文件夹下的**index.html**即可
-- 或者，如果你安装了*nodejs*，可以在控制台输入`node index.js`运行服务器程序时，这个*index.js*只是一个普通的静态文件服务器，然后在游览器地址栏输入`http://127.0.0.1:8080/`打开网页
-- 对IE的支持不是很好
-- *src*目录下的*index.html*文件**并不能**运行
+# RenJuN-五?子棋
 
-开发设置
----
-- 使用*npm*安装开发时依赖
-```
-npm install
-```
-- webpack需要全局安装
-```
-npm install webpack webpack-cli -g
-```
-- 在控制台输入指令`webpack`, 使用*webpack*来打包、编译ES6的代码
-``` 
-  webpack
-```
-- 源代码在*src*文件夹下面,*public*文件夹下是编译好的静态网页文件
-- 测试项目
-```
-npm test
-```
+## [查看项目](https://brainburster.github.io/RenJuN/ "五子棋项目")  
 
+## 说明
 
- todolist
- ---
+### 运行项目
+
+- 直接用游览器打开*public*文件夹下的*index.html*即可
+- 或者，如果你安装了**nodejs**，可以在控制台输入`node index.js`运行服务器程序时，这个*index.js*只是一个普通的静态文件服务器，然后在游览器地址栏输入`http://127.0.0.1:8080/`打开网页
+- 由于使用了**inline worker**实现了多线程，因此不再支持**IE**
+- *src*目录下是源码文件，无法再游览器上运行，通过**webpack**打包之后，在*public*文件夹下生成的文件才能够在游览器上运行
+
+### todolist
+
 - [x] 可改变棋盘大小
 - [x] 可设获胜所需的棋子数
 - [x] 悔棋
@@ -46,8 +25,9 @@ npm test
 - [ ] 置换表
 - [ ] 开局库
 - [ ] 禁手
-- [ ] 网页多线程
+- [X] 网页多线程
 - [X] AI设置界面
 - [x] 设置时限
 - [ ] 其他功能
-- [ ] 界面美化
+- [ ] ~~界面美化~~
+- [ ] 兼容IE

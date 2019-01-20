@@ -17,29 +17,29 @@ const main = () => {
   const depthLabel = document.getElementById('board-depth-value')
   const breadthLabel = document.getElementById('board-breadth-value')
   const timelimitLabel = document.getElementById('board-timelimit-value')
-  const TitleLabel = document.getElementById('title-value')
-  const chineseNumbers = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九']
-  TitleLabel.innerHTML = `<span style="color:red;">${nWinRange.value}</span>-${chineseNumbers[nWinRange.value]}`
+  const titleLabel = document.getElementById('title-value')
+  const chineseNumbers = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九']
+  titleLabel.innerHTML = `<span style="color:red;">${nWinRange.value}</span>-${chineseNumbers[nWinRange.value]}`
 
+  // new Controller()
   const controller = new Controller(canvas, info, btnAiFrist, sizeRange.valueAsNumber, nWinRange.valueAsNumber, breadthRange.valueAsNumber, depthRange.valueAsNumber, timelimitRange.valueAsNumber * 100)
 
   depthRange.onmouseup = depthRange.oninput = (e) => {
     depthLabel.innerText = depthRange.value
-    controller.AI.maxDepth = Math.max(0, depthRange.valueAsNumber)
+    controller.depth = Math.max(0, depthRange.valueAsNumber)
   }
   breadthRange.onmouseup = breadthRange.oninput = (e) => {
     breadthLabel.innerText = breadthRange.value
-    controller.AI.maxBreadth = Math.max(1, breadthRange.valueAsNumber)
+    controller.breadth = Math.max(1, breadthRange.valueAsNumber)
   }
   timelimitRange.onmouseup = timelimitRange.oninput = (e) => {
     timelimitLabel.innerText = timelimitRange.valueAsNumber * 100
-    controller.AI.timelimit = Math.max(100, timelimitRange.valueAsNumber * 100)
+    controller.timelimit = Math.max(100, timelimitRange.valueAsNumber * 100)
   }
   nWinRange.onmouseup = nWinRange.oninput = (e) => {
     nWinLabel.innerText = nWinRange.value
     controller.changeNWin(nWinRange.valueAsNumber)
-    // TitleLabel.innerText = `${nWinRange.value}-${chineseNumbers[nWinRange.value]}`
-    TitleLabel.innerHTML = `<span style="color:red;">${nWinRange.value}</span>-${chineseNumbers[nWinRange.value]}`
+    titleLabel.innerHTML = `<span style="color:red;">${nWinRange.value}</span>-${chineseNumbers[nWinRange.value]}`
   }
   sizeRange.onmouseup = sizeRange.oninput = (e) => {
     const value = isNaN(sizeRange.valueAsNumber) ? 15 : sizeRange.valueAsNumber
@@ -55,9 +55,7 @@ const main = () => {
   btnDebug.onclick = (e) => {
     btnDebug.value = controller.changeMode()
   }
-  // 这里不能用lambda表达式，因为this需要动态绑定
   info.onclick = setting.onclick = function (e) {
-    // 不处理子元素冒泡上来的事件
     if (e.target.id !== this.id) {
       return
     }

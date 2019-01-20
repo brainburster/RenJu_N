@@ -3,8 +3,8 @@ import { Analyser } from './analyser'
  * 贪心算法AI，功能是获取可以下的点的数组，并做启发式排序
  */
 class GreedAI {
-  constructor (controller) {
-    this.board = controller.board
+  constructor (board) {
+    this.board = board
   }
   /** 获取可以下的点的数组，并做了排序 */
   getNexts (color, searchRange) {
