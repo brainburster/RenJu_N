@@ -12,7 +12,7 @@ import { Analyser } from './analyser'
  * - [x] 时限
  * - [ ] 置换表
  * - [ ] 开局库
- * - [ ] 禁手
+ * - [x] 禁手
  * - [x] 多线程
  * - [x] AI设置界面
  * - [ ] 其他功能
@@ -41,7 +41,7 @@ class GameTreeAI extends GreedAI {
   }
 
   /** 获取最佳下法 */
-  think (color, depth, alpha, beta) {
+  think (color, depth, alpha, beta, foulRule) {
     // 如果是叶子节点则直接返回分数
     if (depth < 1) {
       return Analyser.getScore(this.board, color) - Analyser.getScore(this.board, -color)
@@ -65,7 +65,9 @@ class GameTreeAI extends GreedAI {
       }
       this.board.placeStone(place)// 下棋
       if (Analyser.isWin(this.board, place)) {
-        place.score = 100000 + depth // 加上这个深度是为了让AI认为：早点胜利分值更高
+        place.score = 100000 + depth
+      } else if (foulRule && color === -1 && Analyser.isFoul(this.board, place)) {
+        place.score = -(100000 + depth)
       } else {
         // 对方分数的相反数，就是己方的分数，（这对估值函数有一定要求，不然depth的奇偶性会造成摇摆）
         place.score = -this.think(-color, depth - 1, -beta, -alpha)
@@ -86,7 +88,7 @@ class GameTreeAI extends GreedAI {
   }
 
   /** 迭代深化 */
-  iterativeDeepening (color) {
+  iterativeDeepening (color, foulRule) {
     this.lasttime = new Date()
     this.timeout = false
     this.best = null
@@ -94,7 +96,7 @@ class GameTreeAI extends GreedAI {
     let best = this.best
     for (let depth = 1; depth <= maxDepthOld; ++depth) {
       this.maxDepth = depth
-      this.think(color, depth, -10e8, 10e8)
+      this.think(color, depth, -10e8, 10e8, foulRule)
       if (this.timeout || this.best === null) { // -> this.best = best 退回到上一次的结果
         break
       }
@@ -112,9 +114,9 @@ class GameTreeAI extends GreedAI {
   }
 
   /** AI执行函数 */
-  run (color, callback) {
+  run (color, foulRule, callback) {
     setTimeout(() => {
-      this.iterativeDeepening(color)
+      this.iterativeDeepening(color, foulRule)
       callback(this.best)
     }, 20)
   }

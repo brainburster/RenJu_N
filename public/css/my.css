@@ -36,7 +36,8 @@ div#app #board-info{
     text-align: center;
     color: white;
     overflow: hidden;
-    margin:12px auto
+    margin:12px auto;
+    text-anchor:middle;
 }
 
 li{

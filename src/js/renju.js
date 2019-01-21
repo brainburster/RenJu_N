@@ -18,36 +18,15 @@ const main = () => {
   const breadthLabel = document.getElementById('board-breadth-value')
   const timelimitLabel = document.getElementById('board-timelimit-value')
   const titleLabel = document.getElementById('title-value')
+  const checkboxFoul = document.getElementById('checkbox-board-foul')
   const chineseNumbers = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九']
   titleLabel.innerHTML = `<span style="color:red;">${nWinRange.value}</span>-${chineseNumbers[nWinRange.value]}`
 
   // new Controller()
-  const controller = new Controller(canvas, info, btnAiFrist, sizeRange.valueAsNumber, nWinRange.valueAsNumber, breadthRange.valueAsNumber, depthRange.valueAsNumber, timelimitRange.valueAsNumber * 100)
+  const controller = new Controller(canvas, info, btnAiFrist, sizeRange.valueAsNumber, nWinRange.valueAsNumber, breadthRange.valueAsNumber, depthRange.valueAsNumber, timelimitRange.valueAsNumber * 100, checkboxFoul.checked)
 
-  depthRange.onmouseup = depthRange.oninput = (e) => {
-    depthLabel.innerText = depthRange.value
-    controller.depth = Math.max(0, depthRange.valueAsNumber)
-  }
-  breadthRange.onmouseup = breadthRange.oninput = (e) => {
-    breadthLabel.innerText = breadthRange.value
-    controller.breadth = Math.max(1, breadthRange.valueAsNumber)
-  }
-  timelimitRange.onmouseup = timelimitRange.oninput = (e) => {
-    timelimitLabel.innerText = timelimitRange.valueAsNumber * 100
-    controller.timelimit = Math.max(100, timelimitRange.valueAsNumber * 100)
-  }
-  nWinRange.onmouseup = nWinRange.oninput = (e) => {
-    nWinLabel.innerText = nWinRange.value
-    controller.changeNWin(nWinRange.valueAsNumber)
-    titleLabel.innerHTML = `<span style="color:red;">${nWinRange.value}</span>-${chineseNumbers[nWinRange.value]}`
-  }
-  sizeRange.onmouseup = sizeRange.oninput = (e) => {
-    const value = isNaN(sizeRange.valueAsNumber) ? 15 : sizeRange.valueAsNumber
-    sizeLabel.innerText = value
-    nWinRange.value = value < 5 ? value : 5
-    nWinRange.oninput(e)
-    controller.changeSize(value)
-    controller.state = EState.start
+  checkboxFoul.oninput = (e) => {
+    controller.foulRule = checkboxFoul.checked
   }
   btnUndo.onclick = (e) => {
     controller.undo()
@@ -62,6 +41,46 @@ const main = () => {
     this.style.height === '20px'
       ? this.style.height = 'auto'
       : this.style.height = '20px'
+  }
+  depthRange.oninput = (e) => {
+    depthLabel.innerText = depthRange.value
+    controller.depth = Math.max(0, depthRange.valueAsNumber)
+  }
+  breadthRange.oninput = (e) => {
+    breadthLabel.innerText = breadthRange.value
+    controller.breadth = Math.max(1, breadthRange.valueAsNumber)
+  }
+  timelimitRange.oninput = (e) => {
+    timelimitLabel.innerText = (timelimitRange.valueAsNumber * 0.1).toFixed(1)
+    controller.timelimit = Math.max(100, timelimitRange.valueAsNumber * 100)
+  }
+  nWinRange.oninput = (e) => {
+    nWinLabel.innerText = nWinRange.value
+    controller.changeNWin(nWinRange.valueAsNumber)
+    titleLabel.innerHTML = `<span style="color:red;">${nWinRange.value}</span>-${chineseNumbers[nWinRange.value]}`
+    if (nWinRange.valueAsNumber === 5) {
+      checkboxFoul.removeAttribute('disabled')
+    } else {
+      checkboxFoul.checked = false
+      controller.foulRule = false
+      checkboxFoul.setAttribute('disabled', 'disabled')
+    }
+  }
+  sizeRange.oninput = (e) => {
+    const value = isNaN(sizeRange.valueAsNumber) ? 15 : sizeRange.valueAsNumber
+    sizeLabel.innerText = value
+    nWinRange.value = Math.min(value, 5)
+    nWinRange.oninput(e)
+    controller.changeSize(value)
+    controller.state = EState.start
+  }
+  if (controller.isIE) {
+    depthRange.onmouseup = depthRange.oninput
+    breadthRange.onmouseup = breadthRange.oninput
+    timelimitRange.onmouseup = timelimitRange.oninput
+    nWinRange.onmouseup = nWinRange.oninput
+    sizeRange.onmouseup = sizeRange.oninput
+    checkboxFoul.onclick = checkboxFoul.oninput
   }
 }
 

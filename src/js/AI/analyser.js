@@ -15,8 +15,10 @@ class Analyser {
     for (let direction = 0; direction < 4; ++direction) {
       const analysisArrays = Analyser.getBoardAnalysisArrays(board, direction)
       for (let analysisArray of analysisArrays) {
-        const [ ooooo, oooo, xoooo, ooo, xooo, oo, xoo ] = Analyser.getWinCount(nWin, color, analysisArray)
-        if (ooooo > 0) {
+        const [ oooooo, ooooo, oooo, xoooo, ooo, xooo, oo, xoo ] = Analyser.getWinCount(nWin, color, analysisArray)
+        if (color === -1 && oooooo > 0) {
+          return -100000
+        } else if (ooooo > 0) {
           return 100000
         }
         ooooCount += oooo
@@ -42,10 +44,6 @@ class Analyser {
       throw new Error('分析的位置不能为空')
     }
 
-    // if (board.getColor(place.x, place.y) !== place.color) {
-    //   board = board.clone()
-    //   board.placeStone(place)
-    // }
     const color = place.color
     const nWin = board.nWin
     let winCount
@@ -53,8 +51,8 @@ class Analyser {
     if (nWin === 1) {
       return true
     } else {
-      let analysisArrays = this.getPlaceAnalysisArrays(board, place, nWin)
-      for (let direction = 0; direction < 4; ++direction) {
+      const analysisArrays = this.getPlaceAnalysisArrays(board, place, nWin)
+      for (let direction = 0; direction < analysisArrays.length; ++direction) {
         winCount = 0
         for (const value of analysisArrays[direction]) {
           if (value === color) {
@@ -70,6 +68,44 @@ class Analyser {
 
     return false
   }
+  /** 判断是否犯规（禁手） */
+  static isFoul (board, place) {
+    if (place === undefined) {
+      throw new Error('分析的位置不能为空')
+    }
+    const color = place.color
+    const nWin = board.nWin
+    const range = nWin + 1
+    if (color === 1) {
+      return false
+    }
+    let noooooo = 0
+    let noooo = 0
+    let nooo = 0
+    const analysisArrays = this.getPlaceAnalysisArrays(board, place, range)
+    for (const analysisArray of analysisArrays) {
+      const [ oooooo,, oooo, xoooo, ooo,,, ] = Analyser.getWinCount(nWin, color, analysisArray)
+      noooooo += oooooo
+      noooo += oooo + xoooo
+      nooo += ooo
+    }
+    if (noooooo > 0) { // 长连禁手
+      return '长连禁手'
+    } else if (nooo === 2) { // 33,433
+      if (noooo === 0) {
+        return '三三禁手'
+      } else if (noooo === 1) {
+        return '四三三禁手'
+      }
+    } else if ((noooo === 2) && nooo < 2) { // 44,344
+      if (nooo === 0) {
+        return '四四禁手'
+      } else if (nooo === 1) {
+        return '三四四禁手'
+      }
+    }
+    return false
+  }
   /** 获得单个棋子的分数 */
   static getPlaceScore (board, place) {
     if (place === undefined) {
@@ -77,27 +113,26 @@ class Analyser {
     }
     const nWin = board.nWin
     const range = nWin + 1
-
     let score = 0
-    // 先计算下了这一步的分数
-    const isOk = board.placeStone(place)
-    if (!isOk) {
-      throw new Error(`in Analyser.getPlaceScore() x:${place.x},y:${place.y}`)
-    }
+
     let analysisArrays = Analyser.getPlaceAnalysisArrays(board, place, range)
     for (const analysisArray of analysisArrays) {
-      const [ ooooo, oooo, xoooo, ooo, xooo, oo, xoo ] = Analyser.getWinCount(nWin, place.color, analysisArray)
-      const [ xxxxx, xxxx, oxxxx, xxx, oxxx, xx, oxx ] = Analyser.getWinCount(nWin, -place.color, analysisArray)
+      const [ , ooooo, oooo, xoooo, ooo, xooo, oo, xoo ] = Analyser.getWinCount(nWin, place.color, analysisArray)
+      if (ooooo > 0) {
+        return 100000
+      }
+      const [ , xxxxx, xxxx, oxxxx, xxx, oxxx, xx, oxx ] = Analyser.getWinCount(nWin, -place.color, analysisArray)
       score += (ooooo - xxxxx) * 10000 + (oooo - xxxx) * 1000 + (xoooo - oxxxx) * 300 + (ooo - xxx) * 200 + (xooo - oxxx) * 30 + (oo - xx) * 30 + (xoo - oxx) * 1
     }
-    // 还原棋盘，再计算一次，然后两次做差
-    board.undo(place)
+    const backup = place.color
+    place.color = 0
     analysisArrays = Analyser.getPlaceAnalysisArrays(board, place, range)
     for (const analysisArray of analysisArrays) {
-      const [ ooooo, oooo, xoooo, ooo, xooo, oo, xoo ] = Analyser.getWinCount(nWin, place.color, analysisArray)
-      const [ xxxxx, xxxx, oxxxx, xxx, oxxx, xx, oxx ] = Analyser.getWinCount(nWin, -place.color, analysisArray)
+      const [ , ooooo, oooo, xoooo, ooo, xooo, oo, xoo ] = Analyser.getWinCount(nWin, backup, analysisArray)
+      const [ , xxxxx, xxxx, oxxxx, xxx, oxxx, xx, oxx ] = Analyser.getWinCount(nWin, -backup, analysisArray)
       score -= (ooooo - xxxxx) * 10000 + (oooo - xxxx) * 1000 + (xoooo - oxxxx) * 300 + (ooo - xxx) * 200 + (xooo - oxxx) * 30 + (oo - xx) * 20 + (xoo - oxx) * 1
     }
+    place.color = backup
     return score
   }
   /** 仅在本类调用 */
@@ -105,6 +140,7 @@ class Analyser {
     const stackMaxLength = nWin + 1
     const analysisStack = []
     let count = 0
+    let oooooo = 0
     let ooooo = 0
     let oooo = 0
     let xoooo = 0
@@ -118,15 +154,16 @@ class Analyser {
     for (let index = 0; index < analysisArray.length; ++index) {
       let value = isNaN(analysisArray[index]) ? -color : analysisArray[index]
       if (value === color || analysisStack.length > 0) {
-        // 这段的用意是，让 o_ooo_o 这种线性复杂棋形被理解为 [o_ooo, ooo_o]
         if (analysisStack.length === 0) {
-          let researchIndex = analysisArray.lastIndexOf(-color, index)
-          researchIndex = researchIndex > (index - nWin + 1 > 0 ? index - nWin + 1 : 0) ? researchIndex : (index - nWin + 1 > 0 ? index - nWin + 1 : 0)
-          researchIndex = analysisArray.indexOf(color, researchIndex + 1)
-          if (researchIndex < index && researchIndex > 0) {
-            index = researchIndex // >=1
-            value = analysisArray[index]
-            lastColor = analysisArray[index - 1]
+          if (lastColor !== -color) {
+            let researchIndex = analysisArray.lastIndexOf(-color, index)
+            researchIndex = Math.max(researchIndex, Math.max(index - nWin + 2, 0))
+            researchIndex = analysisArray.indexOf(color, researchIndex)
+            if (researchIndex < index && researchIndex > 0) {
+              index = researchIndex // >=1
+              value = analysisArray[index]
+              lastColor = analysisArray[index - 1]
+            }
           }
 
           analysisStack.push(lastColor)
@@ -139,25 +176,23 @@ class Analyser {
           count = 0
           analysisStack.forEach((v) => { if (v === color) { count += 2 } })
           if (count >= nWin * 2) {
-            ooooo += 1
+            ooooo += 1 // 胜利
+            if (color === -1 && (count > nWin * 2 || analysisArray[index + 1] === color)) {
+              oooooo += 1 // 黑方禁手
+            }
           }
           endBlock = analysisStack.lastIndexOf(color) + 1
           endBlock = endBlock > analysisStack.length - 1 ? analysisStack.length - 1 : endBlock
           endBlock = analysisStack[endBlock]
           if (endBlock !== 0) { // ooox
             count -= 1
-          }
-          if (analysisStack[0] !== 0) { // xooo
+          } else if (analysisStack[0] !== 0) { // xooo
             count -= 1
           }
           if (index - analysisArray.lastIndexOf(-color, index - 1) <= ((analysisStack[analysisStack.length - 1] === -color ? nWin : nWin - 1))) { // x_oo_x
             count = -10000
           }
           switch (nWin * 2 - count) {
-            case -2:
-            case -1:
-            case 0:
-            case 1:
             case 2:
               oooo += 1
               break
@@ -184,7 +219,7 @@ class Analyser {
       }
       lastColor = value
     }
-    return [ ooooo, oooo, xoooo, ooo, xooo, oo, xoo ]
+    return [ oooooo, ooooo, oooo, xoooo, ooo, xooo, oo, xoo ]
   }
   /** 仅在本类调用 */
   static getBoardAnalysisArrays (board, direction) {
@@ -232,12 +267,18 @@ class Analyser {
     if (place === undefined) {
       throw new Error('分析的位置不能为空')
     }
-    const analysisArrays = [[], [], [], []]// 4个方向
+    const analysisArrays = [[], [], [], []]
     const data = board.data
     const x = place.x
     const y = place.y
     let index = 0
-    for (let i = -range + 1; i < range; i++) {
+    for (let i = -range - 1; i < range; i++) {
+      if (i === 0) {
+        for (let i = 0; i < analysisArrays.length; i++) {
+          analysisArrays[i].push(place.color)
+        }
+        continue
+      }
       index = board.getIndex(i + x, y)
       if (index > -1) { analysisArrays[0].push(data[index]) }
       index = board.getIndex(x, i + y)

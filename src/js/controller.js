@@ -14,8 +14,9 @@ var EState = {
 }
 
 class Controller {
-  constructor (canvas, info, btnAiFrist, size = 15, nWin = 5, breadth = 8, depth = 8, timelimit = 300) {
+  constructor (canvas, info, btnAiFrist, size = 15, nWin = 5, breadth = 8, depth = 8, timelimit = 300, foulRule = true) {
     this.state = EState.init // 游戏的状态
+    this.foulRule = foulRule // 是否有禁手规则
     this.pointer = { x: NaN, y: NaN } // 落子提示
     this.playerColor = -1 // -1代表黑色
     this.stoneList = [] // 记录下过的棋子
@@ -29,9 +30,9 @@ class Controller {
     this.board = new Board(size, nWin)
     this.renderer = new Renderer(this)
 
+    // 是否为IE
     this.isIE = !!window.ActiveXObject || 'ActiveXObject' in window
 
-    // 如果非IE则使用多线程版本AI，因为我电脑上只有Chrome、IE、Edge,所以其他游览器我不考虑
     this.registerAI()
 
     canvas.onmouseup = (e) => {
@@ -42,6 +43,8 @@ class Controller {
     canvas.onclick = (e) => {
       if (this.debugMode) {
         this.debugBoard(e.offsetX, e.offsetY)
+        btnAiFrist.disabled = true
+        btnAiFrist.style.display = 'none'
         return false
       }
 
@@ -72,16 +75,16 @@ class Controller {
       this.pointer.x = e.offsetX
       this.pointer.y = e.offsetY
     }
-
     btnAiFrist.onclick = (e) => {
       const center = Math.floor(this.board.size / 2)
-      const place = new Place(center, center, -this.playerColor)
+      const place = new Place(center, center, this.playerColor)
       this.board.placeStone(place)
       this.stoneList.push(place)
-      this.swapColor()
+      // this.swapColor()
+      this.playerColor *= -1
       btnAiFrist.disabled = true
       btnAiFrist.style.display = 'none'
-      this.info.innerText = `*\nAI先手默认下在中心点\n*`
+      this.log('AI先手默认下在中心点')
     }
     this.renderer.updataLoop(60)// 渲染驱动
     this.state = EState.start
@@ -115,6 +118,9 @@ class Controller {
     if (point === undefined) {
       return
     }
+    if (twice) {
+      twice = point.color !== this.playerColor
+    }
     this.board.undo(point)
     this.playerColor *= -1
     this.state = EState.waitplayer
@@ -139,6 +145,16 @@ class Controller {
       return
     }
     this.stoneList.push(place)
+    if (this.foulRule) {
+      let isFoul = Analyser.isFoul(this.board, place)
+      if (isFoul) {
+        isFoul = `你输了：${isFoul}`
+        this.log(isFoul)
+        window.alert(isFoul)
+        this.state = EState.end
+        return
+      }
+    }
     let isWin = Analyser.isWin(this.board, place)
     if (isWin) {
       this.log('你赢了')
@@ -156,14 +172,30 @@ class Controller {
   runAI () {
     if (this.isIE) { // 启动单线程版本的AI
       this.AI.init(this.board, this.breadth, this.depth, 2, this.timelimit)
-      this.AI.run(-this.playerColor, (best) => {
+      this.AI.run(-this.playerColor, this.foulRule, (best) => {
         if (best === null || isNaN(best.x) || isNaN(best.y)) {
           this.state = EState.end
           this.log('平局')
           window.alert('平局')
           return
         }
-        this.board.placeStone(best)
+        let isOK = this.board.placeStone(best)
+        if (!isOK) {
+          this.log('你赢了，AI错误')
+          window.alert('你赢了，AI错误')
+          this.state = EState.end
+          return
+        }
+        if (this.foulRule) {
+          let isFoul = Analyser.isFoul(this.board, best)
+          if (isFoul) {
+            isFoul = `你赢了，AI：${isFoul}`
+            this.log(isFoul)
+            window.alert(isFoul)
+            this.state = EState.end
+            return
+          }
+        }
         let isWin = Analyser.isWin(this.board, best)
         this.stoneList.push(best)
         if (isWin) {
@@ -180,13 +212,14 @@ class Controller {
         )
         this.state = EState.waitplayer
       })
-    } else { // 将数据穿给多线程版的AI
+    } else { // 把数据传给多线程版的AI
       this.AIWorker.postMessage({
         color: -this.playerColor,
         board: this.board, // 传输过程经过了json化，因此接口被破坏了，需要在AI.worker.js中修复
         depth: this.depth,
         breadth: this.breadth,
-        timelimit: this.timelimit
+        timelimit: this.timelimit,
+        foulRule: this.foulRule
       })
     }
   }
@@ -207,7 +240,23 @@ class Controller {
           window.alert('平局')
           return
         }
-        this.board.placeStone(best)
+        let isOK = this.board.placeStone(best)
+        if (!isOK) {
+          this.log('你赢了，AI错误')
+          window.alert('你赢了，AI错误')
+          this.state = EState.end
+          return
+        }
+        if (this.foulRule) {
+          let isFoul = Analyser.isFoul(this.board, best)
+          if (isFoul) {
+            isFoul = `你赢了，AI：${isFoul}`
+            this.log(isFoul)
+            window.alert(isFoul)
+            this.state = EState.end
+            return
+          }
+        }
         let isWin = Analyser.isWin(this.board, best)
         this.stoneList.push(best)
         if (isWin) {
@@ -233,11 +282,7 @@ class Controller {
     const x = Math.round(offsetX / gridSize - 0.5)
     const y = Math.round(offsetY / gridSize - 0.5)
     this.board.debug(x, y)
-  }
-
-  swapColor () {
-    EStoneColor.white *= -1
-    EStoneColor.black *= -1
+    this.state = EState.waitplayer
   }
 }
 
