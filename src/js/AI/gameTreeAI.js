@@ -66,11 +66,10 @@ class GameTreeAI extends GreedAI {
       this.board.placeStone(place)// 下棋
       if (Analyser.isWin(this.board, place)) {
         place.score = 100000 + depth
-      } else if (foulRule && color === -1 && Analyser.isFoul(this.board, place)) {
-        place.score = -(100000 + depth)
+      } else if (foulRule && Analyser.isFoul(this.board, place)) {
+        place.score = -100000 - depth
       } else {
-        // 对方分数的相反数，就是己方的分数，（这对估值函数有一定要求，不然depth的奇偶性会造成摇摆）
-        place.score = -this.think(-color, depth - 1, -beta, -alpha)
+        place.score = -this.think(-color, depth - 1, -beta, -alpha, foulRule)
       }
       this.board.undo(place)// 还原棋盘
 
@@ -97,7 +96,7 @@ class GameTreeAI extends GreedAI {
     for (let depth = 1; depth <= maxDepthOld; ++depth) {
       this.maxDepth = depth
       this.think(color, depth, -10e8, 10e8, foulRule)
-      if (this.timeout || this.best === null) { // -> this.best = best 退回到上一次的结果
+      if (this.timeout || this.best === null) {
         break
       }
       best = this.best

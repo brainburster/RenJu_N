@@ -39,6 +39,7 @@ class Renderer {
     const board = this.controller.board
     const pointer = this.controller.pointer
     const stoneList = this.controller.stoneList
+    const foulList = this.controller.foulList
     const currentColor = this.controller.playerColor
     this.context.clearRect(0, 0, this.canvasSize, this.canvasSize)
     let gridSize = this.canvasSize / board.size
@@ -55,6 +56,17 @@ class Renderer {
 
     this.drawPointer(pointer.x, pointer.y, gridSize, currentColor)
 
+    if (this.controller.foulRule) {
+      foulList.forEach((point) => {
+        let x = (point.x + 0.50) * gridSize
+        let y = (point.y + 0.50) * gridSize + 1
+        this.context.font = `${gridSize * 0.8}px Georgia, 'Times new roman'`
+        this.context.fillStyle = 'darkred'
+        this.context.textBaseline = 'middle'
+        this.context.textAlign = 'center'
+        this.context.fillText('X', x, y)
+      })
+    }
     let sign = stoneList[stoneList.length - 1]
     if (sign !== undefined) {
       this.context.beginPath()
