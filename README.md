@@ -1,6 +1,6 @@
 # RenJuN-五?子棋
 
-## [查看项目](https://brainburster.github.io/RenJuN/ "五子棋项目")  
+## [查看项目](https://brainburster.github.io/RenJu_N/ "五子棋项目")  
 
 ## 说明
 
