@@ -1,7 +1,13 @@
-# RenJuN-五?子棋
+RenJu_N-五(井)子棋
+======
+
+![browser](https://img.shields.io/badge/browser-chrome|firefox|edge|ie11-orange.svg)
+![browser](https://img.shields.io/badge/dependencies-none-green.svg)
 
 ## [查看项目](https://brainburster.github.io/RenJu_N/public "五子棋项目")  
+[![chessboard](./chessboard.png)](https://brainburster.github.io/RenJu_N/public)
 
+[![chessboard2](./chessboard2.png)](https://brainburster.github.io/RenJu_N/public)
 ## 说明
 
 ### 运行项目
@@ -16,8 +22,8 @@
 - [x] 可设获胜所需的棋子数
 - [x] 悔棋
 - [x] 棋盘调试
-- [x] 贪心算法（先验知识）
-- [x] 博弈树（使用了负极大值算法，与极大极小值算法类似）
+- [x] 贪心算法
+- [x] 博弈树
 - [x] alpha-beta减枝
 - [x] 启发式(先验)减枝
 - [x] 迭代深化
