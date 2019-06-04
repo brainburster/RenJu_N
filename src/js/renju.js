@@ -3,7 +3,7 @@ import {
   EState
 } from './controller'
 
-const main = () => {
+const main = function () {
   const setting = document.getElementById('app-setting')
   const canvas = document.getElementById('app-canvas')
   const btnAiFrist = document.getElementById('btn-ai-frist')
@@ -25,7 +25,13 @@ const main = () => {
   const chineseNumbers = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九']
   titleLabel.innerHTML = `<span style="color:red;">${nWinRange.value}</span>-${chineseNumbers[nWinRange.value]}`
 
-  // new Controller()
+  sizeRange.value = localStorage.size || sizeRange.value
+  nWinRange.value = localStorage.nWin || nWinRange.value
+  depthRange.value = localStorage.depth || depthRange.value
+  breadthRange.value = localStorage.breadth || breadthRange.value
+  timelimitRange.value = localStorage.timelimit || timelimitRange.value
+  checkboxFoul.checked = localStorage.isFoul || false;
+
   const controller = new Controller(canvas, info, btnAiFrist, sizeRange.valueAsNumber, nWinRange.valueAsNumber, breadthRange.valueAsNumber, depthRange.valueAsNumber, timelimitRange.valueAsNumber * 100, checkboxFoul.checked)
 
   checkboxFoul.oninput = (e) => {
@@ -85,6 +91,23 @@ const main = () => {
     nWinRange.onmouseup = nWinRange.oninput
     sizeRange.onmouseup = sizeRange.oninput
     checkboxFoul.onclick = checkboxFoul.oninput
+  }
+
+  depthRange.oninput()
+  breadthRange.oninput()
+  timelimitRange.oninput()
+  sizeRange.oninput()
+  nWinRange.value = localStorage.nWin || nWinRange.value
+  nWinRange.oninput()
+
+  window.onunload = (e) => {
+    localStorage.size = sizeRange.value
+    localStorage.nWin = nWinRange.value
+    localStorage.depth = depthRange.value
+    localStorage.breadth = breadthRange.value
+    localStorage.timelimit = timelimitRange.value
+    localStorage.isFoul = checkboxFoul.checked
+    return true
   }
 }
 
