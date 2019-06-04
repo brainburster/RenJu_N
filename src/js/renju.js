@@ -1,4 +1,7 @@
-import { Controller, EState } from './controller'
+import {
+  Controller,
+  EState
+} from './controller'
 
 const main = () => {
   const setting = document.getElementById('app-setting')
@@ -38,9 +41,9 @@ const main = () => {
     if (e.target.id !== this.id) {
       return
     }
-    this.style.height === '20px'
-      ? this.style.height = 'auto'
-      : this.style.height = '20px'
+    this.style.height === '20px' ?
+      this.style.height = 'auto' :
+      this.style.height = '20px'
   }
   depthRange.oninput = (e) => {
     depthLabel.innerText = depthRange.value
@@ -57,7 +60,8 @@ const main = () => {
   nWinRange.oninput = (e) => {
     nWinLabel.innerText = nWinRange.value
     controller.changeNWin(nWinRange.valueAsNumber)
-    titleLabel.innerHTML = `<span style="color:red;">${nWinRange.value}</span>-${chineseNumbers[nWinRange.value]}`
+    let chineseNumber = nWinRange.value == 3 && sizeRange.valueAsNumber == 3 ? '井' : chineseNumbers[nWinRange.value]
+    titleLabel.innerHTML = `<span style="color:red;">${nWinRange.value}</span>-${chineseNumber}`
     if (nWinRange.valueAsNumber === 5) {
       checkboxFoul.removeAttribute('disabled')
     } else {
