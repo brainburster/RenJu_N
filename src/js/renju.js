@@ -30,7 +30,7 @@ const main = function () {
   depthRange.value = localStorage.depth || depthRange.value
   breadthRange.value = localStorage.breadth || breadthRange.value
   timelimitRange.value = localStorage.timelimit || timelimitRange.value
-  checkboxFoul.checked = localStorage.isFoul || false;
+  checkboxFoul.checked = localStorage.isFoul || false
 
   const controller = new Controller(canvas, info, btnAiFrist, sizeRange.valueAsNumber, nWinRange.valueAsNumber, breadthRange.valueAsNumber, depthRange.valueAsNumber, timelimitRange.valueAsNumber * 100, checkboxFoul.checked)
 
@@ -108,6 +108,22 @@ const main = function () {
     localStorage.timelimit = timelimitRange.value
     localStorage.isFoul = checkboxFoul.checked
     return true
+  }
+  const btn_default = document.getElementById('btn-board-default');
+  btn_default.onclick = (e) => {
+    sizeRange.value = 15
+    nWinRange.value = 5
+    depthRange.value = 10
+    breadthRange.value = 6
+    timelimitRange.value = 5
+    checkboxFoul.checked = true
+    setTimeout(() => {
+      depthRange.oninput()
+      breadthRange.oninput()
+      timelimitRange.oninput()
+      sizeRange.oninput()
+      nWinRange.oninput()
+    }, 50)
   }
 }
 
