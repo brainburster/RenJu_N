@@ -1,9 +1,21 @@
-import { Board, Place } from './board'
-import { Renderer, EStoneColor } from './renderer'
-import { Analyser } from './AI/analyser'
-import { GameTreeAI } from './AI/gameTreeAI'
+import {
+  Board,
+  Place
+} from './board'
+import {
+  Renderer,
+  EStoneColor
+} from './renderer'
+import {
+  Analyser
+} from './AI/analyser'
+import {
+  GameTreeAI
+} from './AI/gameTreeAI'
 import AIWorker from './AI/AI.worker.js'
-import { Logger } from './logger'
+import {
+  Logger
+} from './logger'
 
 var EState = {
   init: 0,
@@ -14,10 +26,13 @@ var EState = {
 }
 
 class Controller {
-  constructor (canvas, info, btnAiFrist, size = 15, nWin = 5, breadth = 8, depth = 8, timelimit = 300, foulRule = true) {
+  constructor(canvas, info, btnAiFrist, size = 15, nWin = 5, breadth = 8, depth = 8, timelimit = 300, foulRule = true) {
     this.state = EState.init // 游戏的状态
     this.foulRule = foulRule // 是否有禁手规则
-    this.pointer = { x: NaN, y: NaN } // 落子提示
+    this.pointer = {
+      x: NaN,
+      y: NaN
+    } // 落子提示
     this.playerColor = -1 // -1代表黑色
     this.stoneList = [] // 记录下过的棋子
     this.foulList = [] // 禁手提示
@@ -54,7 +69,7 @@ class Controller {
         case EState.start:
           btnAiFrist.disabled = true
           btnAiFrist.style.display = 'none'
-        // eslint-disable-next-line no-fallthrough
+          // eslint-disable-next-line no-fallthrough
         case EState.waitplayer:
           this.placeStone(e.offsetX, e.offsetY)
           break
@@ -62,9 +77,9 @@ class Controller {
           this.log('别着急，AI正在思考对策')
           break
         case EState.end:
-          window.confirm('游戏已结束，刷新页面?')
-            ? window.location.reload()
-            : window.alert('你也可以通过调整棋盘大小来刷新棋盘')
+          window.confirm('游戏已结束，刷新页面?') ?
+            window.location.reload() :
+            window.alert('你也可以通过调整棋盘大小来刷新棋盘')
           break
         default:
           break
@@ -89,34 +104,44 @@ class Controller {
       this.log('AI先手默认下在中心点')
     }
 
-    this.renderer.updataLoop(60)// 渲染驱动
+    this.renderer.updataLoop(60) // 渲染驱动
     this.state = EState.start
   }
 
-  log (line1, line2, line3) {
+  log(line1, line2, line3) {
     this.logger.log(line1, line2, line3)
   }
 
-  update () {
-    this.renderer.update()// 手动更新棋盘
+  update() {
+    this.renderer.update() // 手动更新棋盘
   }
 
   /** 交换正常模式与debug模式 */
-  changeMode () {
+  changeMode() {
     this.debugMode = !this.debugMode
-    return this.debugMode ? '正常模式' : '调试模式'// 按钮上显示的是反的
+    this.debugMode ?
+      this.log("1.点击空白交叉点会生成白棋",
+        "2.点击白棋会变成黑棋",
+        "3.点击黑棋会使其消失") :
+      this.log("取消调试模式")
+    return this.debugMode ? '正常模式' : '调试模式' // 按钮上显示的是反的
   }
   /** 修改棋盘大小 */
-  changeSize (newSize) {
+  changeSize(newSize) {
     this.board.reSet(newSize, this.board.nWin)
     this.stoneList.length = 0
   }
   /** 修改获胜所需的同一个方向上的棋子数量 */
-  changeNWin (newNWin) {
+  changeNWin(newNWin) {
     this.board.nWin = newNWin
   }
 
-  undo (twice = true, lastUndo = undefined) {
+  undo(twice = true, lastUndo = undefined) {
+    if (this.stoneList.length == 0) {
+      this.board.reSet(this.board.size, this.board.nWin)
+      this.log("已清理棋盘")
+      return
+    }
     const point = this.stoneList.pop()
     if (point === undefined) {
       return
@@ -137,7 +162,7 @@ class Controller {
     }
   }
 
-  placeStone (offsetX, offsetY) {
+  placeStone(offsetX, offsetY) {
     const gridSize = this.renderer.canvasSize / this.board.size
     const x = Math.round(offsetX / gridSize - 0.5)
     const y = Math.round(offsetY / gridSize - 0.5)
@@ -172,7 +197,7 @@ class Controller {
     this.runAI()
   }
 
-  runAI () {
+  runAI() {
     if (this.isIE) { // 启动单线程版本的AI
       this.AI.init(this.board, this.breadth, this.depth, 2, this.timelimit)
       this.AI.run(-this.playerColor, this.foulRule, this.aiBehavior)
@@ -188,7 +213,7 @@ class Controller {
     }
   }
 
-  registerAI () {
+  registerAI() {
     this.aiBehavior = (best) => {
       if (best === null || isNaN(best.x) || isNaN(best.y)) {
         this.state = EState.end
@@ -233,8 +258,15 @@ class Controller {
           if (value !== 0) {
             return
           }
-          const { x, y } = this.board.getXY(index)
-          const test = { x, y, color: this.playerColor }
+          const {
+            x,
+            y
+          } = this.board.getXY(index)
+          const test = {
+            x,
+            y,
+            color: this.playerColor
+          }
           if (Analyser.isFoul(this.board, test)) {
             this.foulList.push(test)
           }
@@ -257,7 +289,7 @@ class Controller {
     }
   }
 
-  debugBoard (offsetX, offsetY) {
+  debugBoard(offsetX, offsetY) {
     this.stoneList.length = 0
     const gridSize = this.renderer.canvasSize / this.board.size
     const x = Math.round(offsetX / gridSize - 0.5)
