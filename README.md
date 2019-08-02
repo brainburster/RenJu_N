@@ -1,13 +1,14 @@
-RenJu_N-五(井)子棋
-======
+# RenJu_N-五(井)子棋
 
 ![browser](https://img.shields.io/badge/browser-chrome|firefox|edge|ie11-orange.svg)
 ![browser](https://img.shields.io/badge/dependencies-none-green.svg)
 
-## [查看项目](https://brainburster.github.io/RenJu_N/public "五子棋项目")  
+## [查看项目](https://brainburster.github.io/RenJu_N/public "五子棋项目")
+
 [![chessboard](./chessboard.png)](https://brainburster.github.io/RenJu_N/public)
 
 [![chessboard2](./chessboard2.png)](https://brainburster.github.io/RenJu_N/public)
+
 ## 说明
 
 ### 运行项目

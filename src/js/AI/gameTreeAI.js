@@ -1,5 +1,5 @@
-import { GreedAI } from './simpleAI'
-import { Analyser } from './analyser'
+import { GreedAI } from './simpleAI';
+import { Analyser } from './analyser';
 
 /**
  * 博弈树AI，继承自贪心AI，依赖于分析类
@@ -18,109 +18,109 @@ import { Analyser } from './analyser'
  * - [ ] 其他功能
  */
 class GameTreeAI extends GreedAI {
-  constructor (board, maxBreadth = 1, maxDepth = 1, searchRange = 2, timelimit = 100) {
-    super(board)
-    this.searchRange = Math.max(searchRange, 1)
-    this.maxBreadth = Math.max(maxBreadth, 1)
-    this.maxDepth = Math.max(maxDepth, 1)
-    this.timeout = false
-    this.lasttime = new Date()
-    this.timelimit = Math.max(timelimit, 100)
-    this.best = null
+  constructor(board, maxBreadth = 1, maxDepth = 1, searchRange = 2, timelimit = 100) {
+    super(board);
+    this.searchRange = Math.max(searchRange, 1);
+    this.maxBreadth = Math.max(maxBreadth, 1);
+    this.maxDepth = Math.max(maxDepth, 1);
+    this.timeout = false;
+    this.lasttime = new Date();
+    this.timelimit = Math.max(timelimit, 100);
+    this.best = null;
   }
 
-  init (board, maxBreadth = 1, maxDepth = 1, searchRange = 2, timelimit = 100) {
-    this.board = board
-    this.searchRange = Math.max(searchRange, 1)
-    this.maxBreadth = Math.max(maxBreadth, 1)
-    this.maxDepth = Math.max(maxDepth, 1)
-    this.timeout = false
-    this.lasttime = new Date()
-    this.timelimit = Math.max(timelimit, 100)
-    this.best = null
+  init(board, maxBreadth = 1, maxDepth = 1, searchRange = 2, timelimit = 100) {
+    this.board = board;
+    this.searchRange = Math.max(searchRange, 1);
+    this.maxBreadth = Math.max(maxBreadth, 1);
+    this.maxDepth = Math.max(maxDepth, 1);
+    this.timeout = false;
+    this.lasttime = new Date();
+    this.timelimit = Math.max(timelimit, 100);
+    this.best = null;
   }
 
   /** 获取最佳下法 */
-  think (color, depth, alpha, beta, foulRule) {
+  think(color, depth, alpha, beta, foulRule) {
     // 如果是叶子节点则直接返回分数
     if (depth < 1) {
-      return Analyser.getScore(this.board, color) - Analyser.getScore(this.board, -color)
+      return Analyser.getScore(this.board, color) - Analyser.getScore(this.board, -color);
     }
-    const openlist = this.getNexts(color, depth === this.maxDepth ? this.searchRange : 1)
+    const openlist = this.getNexts(color, depth === this.maxDepth ? this.searchRange : 1);
     if (openlist.length === 0) {
-      return 0 // 将平局分数设置为零，不然AI会避免平局
+      return 0; // 将平局分数设置为零，不然AI会避免平局
     }
-    openlist.length = Math.min(openlist.length, this.maxBreadth)// 启发式减枝，限制每次递归的广度
+    openlist.length = Math.min(openlist.length, this.maxBreadth);// 启发式减枝，限制每次递归的广度
     // 遍历每一个可行下法
     for (const place of openlist) {
       if (this.best === null) {
-        this.best = place // 默认值为由贪心算法决定的估值最大的一个下法
+        this.best = place; // 默认值为由贪心算法决定的估值最大的一个下法
       }
       // 超时检测
       if (this.maxDepth === depth && this.best !== null) {
         if ((new Date()).getTime() - this.lasttime.getTime() > this.timelimit) {
-          this.timeout = true
-          return 0
+          this.timeout = true;
+          return 0;
         }
       }
-      this.board.placeStone(place)// 下棋
+      this.board.placeStone(place);// 下棋
       if (Analyser.isWin(this.board, place)) {
-        place.score = 100000 + depth
+        place.score = 100000 + depth;
       } else if (foulRule && Analyser.isFoul(this.board, place)) {
-        place.score = -100000 - depth
+        place.score = -100000 - depth;
       } else {
-        place.score = -this.think(-color, depth - 1, -beta, -alpha, foulRule)
+        place.score = -this.think(-color, depth - 1, -beta, -alpha, foulRule);
       }
-      this.board.undo(place)// 还原棋盘
+      this.board.undo(place);// 还原棋盘
 
       if (place.score > alpha) {
-        alpha = place.score// 下界提升
+        alpha = place.score;// 下界提升
         if (depth === this.maxDepth) {
-          this.best = place
+          this.best = place;
         }
       }
       if (place.score >= beta) {
-        break // 减枝
+        break; // 减枝
       }
     }
-    return alpha
+    return alpha;
   }
 
   /** 迭代深化 */
-  iterativeDeepening (color, foulRule) {
-    this.lasttime = new Date()
-    this.timeout = false
-    this.best = null
-    const maxDepthOld = this.maxDepth
-    let best = this.best
+  iterativeDeepening(color, foulRule) {
+    this.lasttime = new Date();
+    this.timeout = false;
+    this.best = null;
+    const maxDepthOld = this.maxDepth;
+    let { best } = this;
     for (let depth = 1; depth <= maxDepthOld; ++depth) {
-      this.maxDepth = depth
-      this.think(color, depth, -10e8, 10e8, foulRule)
+      this.maxDepth = depth;
+      this.think(color, depth, -10e8, 10e8, foulRule);
       if (this.timeout || this.best === null) {
-        break
+        break;
       }
-      best = this.best
-      best.depth = this.maxDepth
+      best = this.best;
+      best.depth = this.maxDepth;
       if (best !== null && best.score >= 100000) {
-        break
+        break;
       }
       // todo:将最优点加入置换表 然后在启发式搜索函数中获取将此下法的排序提前
       // ...
     }
-    this.timeout = false
-    this.maxDepth = maxDepthOld
-    this.best = best
+    this.timeout = false;
+    this.maxDepth = maxDepthOld;
+    this.best = best;
   }
 
   /** AI执行函数 */
-  run (color, foulRule, callback) {
+  run(color, foulRule, callback) {
     setTimeout(() => {
-      this.iterativeDeepening(color, foulRule)
-      callback(this.best)
-    }, 20)
+      this.iterativeDeepening(color, foulRule);
+      callback(this.best);
+    }, 20);
   }
 }
 
 export {
-  GameTreeAI
-}
+  GameTreeAI,
+};
