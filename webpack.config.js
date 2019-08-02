@@ -10,7 +10,6 @@ module.exports = {
     filename: './js/renju.min.js',
   },
   mode: 'production',
-  // mode: 'development',
   module: {
     rules: [{
       test: /\.js$/,
