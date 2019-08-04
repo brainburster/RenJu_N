@@ -20,13 +20,7 @@ import Analyser from './analyser';
 class GameTreeAI extends GreedAI {
   constructor(board, maxBreadth = 1, maxDepth = 1, searchRange = 2, timelimit = 100) {
     super(board);
-    this.searchRange = Math.max(searchRange, 1);
-    this.maxBreadth = Math.max(maxBreadth, 1);
-    this.maxDepth = Math.max(maxDepth, 1);
-    this.timeout = false;
-    this.lasttime = new Date();
-    this.timelimit = Math.max(timelimit, 100);
-    this.best = null;
+    this.init(board, maxBreadth, maxDepth, searchRange, timelimit);
   }
 
   init(board, maxBreadth = 1, maxDepth = 1, searchRange = 2, timelimit = 100) {
@@ -95,7 +89,7 @@ class GameTreeAI extends GreedAI {
 
     for (let depth = 1; depth <= maxDepthOld; depth += 1) {
       this.maxDepth = depth;
-      this.think(color, depth, -100000000, 100000000, foulRule);
+      this.think(color, depth, -1000000, 1000000, foulRule);
       if (this.timeout || this.best === null) {
         break;
       }

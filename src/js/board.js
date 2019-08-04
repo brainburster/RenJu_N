@@ -24,13 +24,7 @@ class Board {
     this.size = size;
     this.nWin = nWin;
     this.data = new Array(size * size);
-    for (let i = 0; i < size * size; i += 1) {
-      if (data[i] === -1 || data[i] === 1) {
-        this.data[i] = data[i];
-      } else {
-        this.data[i] = 0;
-      }
-    }
+    this.initData(size, data);
   }
 
   getXY(index) {
@@ -104,6 +98,17 @@ class Board {
     return this.clearStone(place.x, place.y);
   }
 
+  initData(size, data = []) {
+    this.data.length = size * size;
+    for (let i = 0; i < size * size; i += 1) {
+      if (data[i] === -1 || data[i] === 1) {
+        this.data[i] = data[i];
+      } else {
+        this.data[i] = 0;
+      }
+    }
+  }
+
   /**
    * 没有创建新对象
    */
@@ -113,14 +118,7 @@ class Board {
     }
     this.size = size;
     this.nWin = nWin;
-    this.data.length = size * size;
-    for (let i = 0; i < size * size; i += 1) {
-      if (data[i] === -1 || data[i] === 1) {
-        this.data[i] = data[i];
-      } else {
-        this.data[i] = 0;
-      }
-    }
+    this.initData(size, data);
   }
 }
 

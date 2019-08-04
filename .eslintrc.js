@@ -22,5 +22,6 @@ module.exports = {
     "no-continue": 0,
     "no-restricted-globals": 0,
     "no-restricted-syntax": 0,
+    "no-alert": 0
   }
 };
