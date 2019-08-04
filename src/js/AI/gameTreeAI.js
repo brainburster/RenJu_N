@@ -1,5 +1,5 @@
-import { GreedAI } from './simpleAI';
-import { Analyser } from './analyser';
+import GreedAI from './simpleAI';
+import Analyser from './analyser';
 
 /**
  * 博弈树AI，继承自贪心AI，依赖于分析类
@@ -50,7 +50,7 @@ class GameTreeAI extends GreedAI {
     if (openlist.length === 0) {
       return 0; // 将平局分数设置为零，不然AI会避免平局
     }
-    openlist.length = Math.min(openlist.length, this.maxBreadth);// 启发式减枝，限制每次递归的广度
+    openlist.length = Math.min(openlist.length, this.maxBreadth); // 启发式减枝，限制每次递归的广度
     // 遍历每一个可行下法
     for (const place of openlist) {
       if (this.best === null) {
@@ -63,7 +63,7 @@ class GameTreeAI extends GreedAI {
           return 0;
         }
       }
-      this.board.placeStone(place);// 下棋
+      this.board.placeStone(place); // 下棋
       if (Analyser.isWin(this.board, place)) {
         place.score = 100000 + depth;
       } else if (foulRule && Analyser.isFoul(this.board, place)) {
@@ -71,10 +71,10 @@ class GameTreeAI extends GreedAI {
       } else {
         place.score = -this.think(-color, depth - 1, -beta, -alpha, foulRule);
       }
-      this.board.undo(place);// 还原棋盘
+      this.board.undo(place); // 还原棋盘
 
       if (place.score > alpha) {
-        alpha = place.score;// 下界提升
+        alpha = place.score; // 下界提升
         if (depth === this.maxDepth) {
           this.best = place;
         }
@@ -92,24 +92,22 @@ class GameTreeAI extends GreedAI {
     this.timeout = false;
     this.best = null;
     const maxDepthOld = this.maxDepth;
-    let { best } = this;
-    for (let depth = 1; depth <= maxDepthOld; ++depth) {
+
+    for (let depth = 1; depth <= maxDepthOld; depth += 1) {
       this.maxDepth = depth;
-      this.think(color, depth, -10e8, 10e8, foulRule);
+      this.think(color, depth, -100000000, 100000000, foulRule);
       if (this.timeout || this.best === null) {
         break;
       }
-      best = this.best;
-      best.depth = this.maxDepth;
-      if (best !== null && best.score >= 100000) {
+      if (this.best !== null && this.best.score >= 100000) {
         break;
       }
       // todo:将最优点加入置换表 然后在启发式搜索函数中获取将此下法的排序提前
       // ...
     }
     this.timeout = false;
+    this.best.depth = this.maxDepth;
     this.maxDepth = maxDepthOld;
-    this.best = best;
   }
 
   /** AI执行函数 */
@@ -121,6 +119,4 @@ class GameTreeAI extends GreedAI {
   }
 }
 
-export {
-  GameTreeAI,
-};
+export default GameTreeAI;

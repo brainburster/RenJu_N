@@ -6,16 +6,10 @@ import {
   Renderer,
   EStoneColor,
 } from './renderer';
-import {
-  Analyser,
-} from './AI/analyser';
-import {
-  GameTreeAI,
-} from './AI/gameTreeAI';
+import Analyser from './AI/analyser';
+import GameTreeAI from './AI/gameTreeAI';
 import AIWorker from './AI/AI.worker';
-import {
-  Logger,
-} from './logger';
+import Logger from './logger';
 
 const EState = {
   init: 0,

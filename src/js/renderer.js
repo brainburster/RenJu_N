@@ -36,16 +36,24 @@ class Renderer {
 
   /** 更新一帧 */
   update() {
-    const { board } = this.controller;
-    const { pointer } = this.controller;
-    const { stoneList } = this.controller;
-    const { foulList } = this.controller;
+    const {
+      board,
+    } = this.controller;
+    const {
+      pointer,
+    } = this.controller;
+    const {
+      stoneList,
+    } = this.controller;
+    const {
+      foulList,
+    } = this.controller;
     const currentColor = this.controller.playerColor;
     this.context.clearRect(0, 0, this.canvasSize, this.canvasSize);
     const gridSize = this.canvasSize / board.size;
 
     this.context.beginPath();
-    for (let i = 0; i < board.size; i++) {
+    for (let i = 0; i < board.size; i += 1) {
       this.context.moveTo(i * gridSize + gridSize / 2, gridSize / 2);
       this.context.lineTo(i * gridSize + gridSize / 2, (board.size - 1) * gridSize + gridSize / 2);
       this.context.moveTo(gridSize / 2, i * gridSize + gridSize / 2);
@@ -58,8 +66,8 @@ class Renderer {
 
     if (this.controller.foulRule) {
       foulList.forEach((point) => {
-        const x = (point.x + 0.50) * gridSize;
-        const y = (point.y + 0.50) * gridSize + 1;
+        const x = (point.x + 0.5) * gridSize;
+        const y = (point.y + 0.5) * gridSize + 1;
         this.context.font = `${gridSize * 0.8}px Georgia, 'Times new roman'`;
         this.context.fillStyle = 'darkred';
         this.context.textBaseline = 'middle';
@@ -70,7 +78,8 @@ class Renderer {
     const sign = stoneList[stoneList.length - 1];
     if (sign !== undefined) {
       this.context.beginPath();
-      this.context.arc((sign.x + 0.5) * gridSize, (sign.y + 0.5) * gridSize, gridSize / 2, 0, 360, false);
+      this.context.arc((sign.x + 0.5) * gridSize,
+        (sign.y + 0.5) * gridSize, gridSize / 2, 0, 360, false);
       this.context.fillStyle = 'darkgray';
       this.context.fill();
       this.context.closePath();
@@ -96,8 +105,8 @@ class Renderer {
     });
 
     stoneList.forEach((point, index) => {
-      const x = (point.x + 0.50) * gridSize;
-      const y = (point.y + 0.50) * gridSize;
+      const x = (point.x + 0.5) * gridSize;
+      const y = (point.y + 0.5) * gridSize;
       if (index > 8) { // index+1>=10
         this.context.font = `${gridSize * 0.55}px Georgia, 'Times new roman'`;
       } else {
