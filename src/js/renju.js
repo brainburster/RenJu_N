@@ -71,7 +71,7 @@ function main() {
   nWinRange.oninput = () => {
     nWinLabel.innerText = nWinRange.value;
     controller.changeNWin(nWinRange.valueAsNumber);
-    const chineseNumber = nWinRange.value === 3 && sizeRange.valueAsNumber === 3 ? '井字' : (`${chineseNumbers[nWinRange.value]}子`);
+    const chineseNumber = (nWinRange.valueAsNumber === 3 && sizeRange.valueAsNumber === 3) ? '井字' : (`${chineseNumbers[nWinRange.value]}子`);
     titleLabel.innerHTML = `<span style="color:red;">${nWinRange.value}</span>-${chineseNumber}`;
     if (nWinRange.valueAsNumber === 5) {
       checkboxFoul.removeAttribute('disabled');
