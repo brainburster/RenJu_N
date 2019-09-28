@@ -100,7 +100,9 @@ class GameTreeAI extends GreedAI {
       // ...
     }
     this.timeout = false;
-    this.best.depth = this.maxDepth;
+    if (this.best) {
+      this.best.depth = this.maxDepth;
+    }
     this.maxDepth = maxDepthOld;
   }
 
