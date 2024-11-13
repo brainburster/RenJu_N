@@ -8,6 +8,11 @@ const port = 8080;
 const server = http.createServer();
 
 server.on('request', (request, response) => {
+    if (path.normalize(decodeURI(request.url)) !== decodeURI(request.url)) {
+        response.statusCode = 403;
+        response.end();
+        return;
+    }
   let filename;
   if (request.url === '/') {
     filename = path.join(__dirname, staticPath, 'index.html');
